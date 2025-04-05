@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Readify.Application.Features.Books.V1
 {
-    interface IBooksAppServices
+    public interface IBooksAppServices
     {
     }
 }

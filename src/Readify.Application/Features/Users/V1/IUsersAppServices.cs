@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Readify.Application.Features.Users.V1
 {
-    interface IUsersAppServices
+    public interface IUsersAppServices
     {
     }
 }

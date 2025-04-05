@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Readify.Infrastructure", "R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Readify.CrossCutting", "Readify.CrossCutting\Readify.CrossCutting.csproj", "{C64C2CE4-7A43-463A-AD9D-BD26D07D3A22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Readify.UnitTests", "..\tests\Readify.UnitTests\Readify.UnitTests.csproj", "{07110F38-37CB-4468-AD89-C65C49922171}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{C64C2CE4-7A43-463A-AD9D-BD26D07D3A22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C64C2CE4-7A43-463A-AD9D-BD26D07D3A22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C64C2CE4-7A43-463A-AD9D-BD26D07D3A22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07110F38-37CB-4468-AD89-C65C49922171}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07110F38-37CB-4468-AD89-C65C49922171}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07110F38-37CB-4468-AD89-C65C49922171}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07110F38-37CB-4468-AD89-C65C49922171}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
