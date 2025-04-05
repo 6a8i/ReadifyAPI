@@ -18,10 +18,10 @@ jobs:
         dotnet-version: '9.0.200' 
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore src/Readify.sln
 
     - name: Build the project
-      run: dotnet build --no-restore
+      run: dotnet build src/Readify.sln --no-restore
 
     - name: Run unit tests
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test tests/Readify.UnitTests/Readify.UnitTests.csproj --no-build --verbosity normal
