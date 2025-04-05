@@ -1,0 +1,68 @@
+## Ignorar arquivos específicos do Visual Studio
+*.user
+*.userosscache
+*.suo
+*.cache
+*.docstates
+
+## Ignorar pastas geradas pelo Visual Studio
+.vs/
+.vscode/
+
+## Ignorar arquivos de compilação
+[Bb]in/
+[Oo]bj/
+out/
+
+## Ignorar arquivos de pacotes NuGet
+packages/
+**/packages.lock.json
+**/paket-files/
+
+## Ignorar logs e arquivos temporários
+*.log
+*.tmp
+*.tmp.*
+*.bak
+*.swp
+*~
+
+## Ignorar arquivos de configuração local
+appsettings.local.json
+secrets.json
+.env
+
+## Ignorar arquivos de depuração
+*.pdb
+*.idb
+*.DS_Store
+
+## Ignorar arquivos específicos do .NET Core / .NET 5+
+**/wwwroot/*
+**/dist/
+**/node_modules/
+**/ClientApp/dist/
+**/ClientApp/node_modules/
+
+## Ignorar arquivos de publicação
+publish/
+**/PublishOutput/
+
+## Ignorar arquivos de teste
+TestResult.xml
+coverage.*
+
+## Ignorar arquivos específicos do IIS
+*.pubxml
+*.publishproj
+
+## Ignorar arquivos específicos do Docker
+#Dockerfile*
+#.dockerignore
+#docker-compose.override.yml
+
+## Ignorar arquivos específicos do macOS
+.DS_Store
+
+## Ignorar arquivos específicos do Linux
+Thumbs.db

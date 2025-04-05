@@ -1,0 +1,6 @@
+@Readify.API_HostAddress = http://localhost:5087
+
+GET {{Readify.API_HostAddress}}/books/
+Accept: application/json
+
+###
