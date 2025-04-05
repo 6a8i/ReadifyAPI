@@ -1,0 +1,42 @@
+name: Run Unit Tests on Pull Requests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest 
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.0'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build the project
+      run: dotnet build --no-restore
+
+    - name: Run unit tests with coverage
+      run: dotnet test --collect:"XPlat Code Coverage"
+    
+    - name: Report coverage
+      run: |
+        dotnet tool install -g dotnet-reportgenerator-globaltool
+        reportgenerator \
+          -reports:$(Agent.TempDirectory)/**/coverage.cobertura.xml \
+          -targetdir:coverage \
+          -reporttypes:HtmlInline_AzurePipelines
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: coverage/
