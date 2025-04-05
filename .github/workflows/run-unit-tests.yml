@@ -15,7 +15,7 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '9.0.200' 
+        dotnet-version: '8.0.406' 
 
     - name: Restore dependencies
       run: dotnet restore src/Readify.sln
