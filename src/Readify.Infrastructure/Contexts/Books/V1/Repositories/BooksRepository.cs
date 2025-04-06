@@ -21,6 +21,14 @@ namespace Readify.Infrastructure.Contexts.Books.V1.Repositories
                 return null;
         }
 
+        public async Task<bool> DeleteAsync(Book entity)
+        {
+            _context.Books.Remove(entity);
+            var result = await _context.SaveChangesAsync();
+
+            return result > 0;
+        }
+
         public async Task<List<Book>> GetAllAsync()
         {
             var result = await _context.Books.ToListAsync();
