@@ -35,14 +35,14 @@ namespace Readify.Application.Features.Books.V1.Implementations
                 return Result.Fail("Book not found!");
 
             if (!entity.Status)
-                return Result.Fail("Book can't be deleted. It was boured and yet not returned.");
+                return Result.Fail("Book can't be deleted. It was borrowed and yet not returned.");
 
             bool result = await _booksRepository.DeleteAsync(entity);
 
             if(!result)
                 return Result.Fail("Something went wrong! Try again later.");
 
-            return Result.Ok().WithSuccess($"The book {entity.Title} of id: {entity.Id} was successfuly deleted!");
+            return Result.Ok().WithSuccess($"The book {entity.Title} of id: {entity.Id} was successfully deleted!");
         }
 
         public async Task<Result<List<Models.Responses.Book>>> GetAllBooksAsync()

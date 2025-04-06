@@ -45,9 +45,7 @@ namespace Readify.UnitTests.Features.Books.V1.Repositories
         [Fact]
         public async Task GetAllAsync_ReturnsListOfBooks_WhenBooksExist()
         {
-            // Arrange
-            var count = _context.Books.Count();
-
+            // Arrange            
             var book1 = new Book
             {
                 Id = Guid.NewGuid(),
@@ -70,13 +68,14 @@ namespace Readify.UnitTests.Features.Books.V1.Repositories
             
             await _context.Books.AddRangeAsync(book1, book2);
             await _context.SaveChangesAsync();
-
+            
+            var count = _context.Books.Count();
             // Act
             var result = await _booksRepository.GetAllAsync();
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(count+2, result.Count);
+            Assert.Equal(count, result.Count);
         }
 
         [Fact]
@@ -131,6 +130,52 @@ namespace Readify.UnitTests.Features.Books.V1.Repositories
             // Assert
             Assert.Null(result);
         }
-        
+
+        [Fact]
+        public async Task DeleteAsync_ReturnsTrue_WhenBookIsDeletedSuccessfully()
+        {
+            // Arrange
+            var book = new Book
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            await _context.Books.AddAsync(book);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _booksRepository.DeleteAsync(book);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task DeleteAsync_RemovesBookFromDatabase()
+        {
+            // Arrange
+            var book = new Book
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            await _context.Books.AddAsync(book);
+            await _context.SaveChangesAsync();
+
+            // Act
+            await _booksRepository.DeleteAsync(book);
+            var deletedBook = await _context.Books.FindAsync(book.Id);
+
+            // Assert
+            Assert.Null(deletedBook);
+        }
     }
 }

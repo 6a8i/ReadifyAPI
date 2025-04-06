@@ -336,5 +336,114 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
             Assert.True(result.IsFailed);
             Assert.Equal("Something went wrong! Try again later.", result.Errors.First().Message);
         }
+
+        [Fact]
+        public async Task DeleteBookByIdAsync_ReturnsFailureResult_WhenIdIsEmpty()
+        {
+            // Arrange
+            var emptyId = Guid.Empty;
+
+            // Act
+            var result = await _booksAppServices.DeleteBookByIdAsync(emptyId);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("The id can't be empty.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task DeleteBookByIdAsync_ReturnsFailureResult_WhenBookNotFound()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _booksAppServices.DeleteBookByIdAsync(bookId);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Book not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task DeleteBookByIdAsync_ReturnsFailureResult_WhenBookCannotBeDeleted()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var book = new Book
+            {
+                Id = bookId,
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = false // Book is borrowed and not returned
+            };
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync(book);
+
+            // Act
+            var result = await _booksAppServices.DeleteBookByIdAsync(bookId);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Book can't be deleted. It was borrowed and yet not returned.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task DeleteBookByIdAsync_ReturnsFailureResult_WhenDeletionFails()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var book = new Book
+            {
+                Id = bookId,
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true // Book can be deleted
+            };
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync(book);
+            _mockBooksRepository.Setup(repo => repo.DeleteAsync(book))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _booksAppServices.DeleteBookByIdAsync(bookId);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Something went wrong! Try again later.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task DeleteBookByIdAsync_ReturnsSuccessResult_WhenDeletionIsSuccessful()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var book = new Book
+            {
+                Id = bookId,
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true // Book can be deleted
+            };
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync(book);
+            _mockBooksRepository.Setup(repo => repo.DeleteAsync(book))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _booksAppServices.DeleteBookByIdAsync(bookId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal($"The book {book.Title} of id: {book.Id} was successfully deleted!", result.Successes.First().Message);
+        }
     }
 }
