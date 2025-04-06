@@ -2,7 +2,6 @@
 using Readify.Application.Features.Books.V1.Infrastructure.Entities;
 using Readify.Infrastructure.Commons.DatabaseContexts.V1;
 using Readify.Infrastructure.Contexts.Books.V1.Repositories;
-using System.Diagnostics.Metrics;
 
 namespace Readify.UnitTests.Features.Books.V1.Repositories
 {
