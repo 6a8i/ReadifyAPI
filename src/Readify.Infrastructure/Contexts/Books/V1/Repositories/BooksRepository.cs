@@ -34,5 +34,28 @@ namespace Readify.Infrastructure.Contexts.Books.V1.Repositories
 
             return result;
         }
+
+        public async Task<Book?> UpdateAsync(Book entity)
+        {
+            var result = await _context
+                                .Books
+                                .Where(b => b.Id == entity.Id)
+                                .ExecuteUpdateAsync(b =>
+                                    b.SetProperty(p => p.Status, v => entity.Status)
+                                     .SetProperty(p => p.Author, v => entity.Author)
+                                     .SetProperty(p => p.Genre, v => entity.Genre)
+                                     .SetProperty(p => p.Title, v => entity.Title)
+                                     .SetProperty(p => p.PublishDate, v => entity.PublishDate));
+
+            if (result > 0)
+            {
+                var updatedBook = await _context.Books.FirstOrDefaultAsync(b => b.Id == entity.Id);
+                return updatedBook!;
+            }
+            else
+            { 
+                return null;
+            }
+        }
     }
 }

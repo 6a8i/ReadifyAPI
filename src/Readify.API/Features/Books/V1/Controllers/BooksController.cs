@@ -48,5 +48,16 @@ namespace Readify.API.Features.Books.V1.Controllers
             return Ok(result);
         }
 
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateBookById(Guid id, UpdateBookRequest request)
+        {
+            Result<Book> result = await _appServices.UpdateBookByIdAsync(id, request);
+
+            if (result.IsFailed)
+                return BadRequest(result.Errors);
+
+            return Ok(result);
+        }
+
     }
 }
