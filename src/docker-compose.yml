@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  
+  readify.api:
+    image: ${DOCKER_REGISTRY-}readifyapi
+    build:
+      context: .
+      dockerfile: Readify.API/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - sqlserver
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=ReadifyDb;User Id=sa;Password=Password123!;TrustServerCertificate=True;
+    networks:
+      - readify-network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - readify-network
+
+networks:
+  readify-network:
+
+volumes:
+  sqlserver-data:
