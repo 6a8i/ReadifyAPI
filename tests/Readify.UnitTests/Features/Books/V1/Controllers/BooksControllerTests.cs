@@ -128,5 +128,50 @@ namespace Readify.UnitTests.Features.Books.V1.Controllers
             var resultValue = Assert.IsType<Error>(badRequestResult.Value);
             Assert.Equal(expectedError, resultValue);
         }
+
+        [Fact]
+        public async Task GetBookById_ReturnsOkResult_WithBook()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var book = new Book
+            {
+                Id = bookId,
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            _mockAppServices.Setup(service => service.GetBookByIdAsync(bookId))
+                .ReturnsAsync(Result.Ok(book));
+
+            // Act
+            var result = await _controller.GetBookById(bookId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var resultValue = Assert.IsType<Result<Book>>(okResult.Value);
+            Assert.True(resultValue.IsSuccess);
+            Assert.Equal(bookId, resultValue.Value.Id);
+        }
+
+        [Fact]
+        public async Task GetBookById_ReturnsBadRequest_WhenServiceFails()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var expectedError = new Error("Service failed");
+            _mockAppServices.Setup(service => service.GetBookByIdAsync(bookId))
+                .ReturnsAsync(Result.Fail<Book>(expectedError));
+
+            // Act
+            var result = await _controller.GetBookById(bookId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var resultValue = Assert.IsType<Error>(badRequestResult.Value);
+            Assert.Equal(expectedError, resultValue);
+        }
     }
 }

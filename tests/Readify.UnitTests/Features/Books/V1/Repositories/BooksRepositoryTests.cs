@@ -93,5 +93,43 @@ namespace Readify.UnitTests.Features.Books.V1.Repositories
             Assert.NotNull(result);
             Assert.Empty(result);
         }
+
+        [Fact]
+        public async Task GetBookByIdAsync_ReturnsBook_WhenBookExists()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var book = new Book
+            {
+                Id = bookId,
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            await _context.Books.AddAsync(book);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _booksRepository.GetBookByIdAsync(bookId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(bookId, result.Id);
+        }
+
+        [Fact]
+        public async Task GetBookByIdAsync_ReturnsNull_WhenBookDoesNotExist()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+
+            // Act
+            var result = await _booksRepository.GetBookByIdAsync(bookId);
+
+            // Assert
+            Assert.Null(result);
+        }
     }
 }
