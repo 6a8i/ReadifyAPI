@@ -69,13 +69,13 @@ namespace Readify.UnitTests.Features.Books.V1.Repositories
             await _context.Books.AddRangeAsync(book1, book2);
             await _context.SaveChangesAsync();
             
-            var count = _context.Books.Count();
+            var totalBooksAfterAddition = _context.Books.Count();
             // Act
             var result = await _booksRepository.GetAllAsync();
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(count, result.Count);
+            Assert.Equal(totalBooksAfterAddition, result.Count);
         }
 
         [Fact]

@@ -389,7 +389,7 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
 
             // Assert
             Assert.True(result.IsFailed);
-            Assert.Equal("Book can't be deleted. It was borrowed and yet not returned.", result.Errors.First().Message);
+            Assert.Equal("Book cannot be deleted as it is currently borrowed.", result.Errors.First().Message);
         }
 
         [Fact]

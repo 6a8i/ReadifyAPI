@@ -35,7 +35,7 @@ namespace Readify.Application.Features.Books.V1.Implementations
                 return Result.Fail("Book not found!");
 
             if (!entity.Status)
-                return Result.Fail("Book can't be deleted. It was borrowed and yet not returned.");
+                return Result.Fail("Book cannot be deleted as it is currently borrowed.");
 
             bool result = await _booksRepository.DeleteAsync(entity);
 
