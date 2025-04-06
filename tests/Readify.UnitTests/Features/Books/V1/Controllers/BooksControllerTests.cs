@@ -4,6 +4,7 @@ using Moq;
 using Readify.API.Features.Books.V1.Controllers;
 using Readify.Application.Features.Books.V1;
 using Readify.Application.Features.Books.V1.Models.Requests;
+using Readify.Application.Features.Books.V1.Models.Responses;
 
 namespace Readify.UnitTests.Features.Books.V1.Controllers
 {
@@ -70,6 +71,61 @@ namespace Readify.UnitTests.Features.Books.V1.Controllers
             // Assert
             var okResult = Assert.IsType<BadRequestObjectResult>(result);
             var resultValue = Assert.IsType<Error>(okResult.Value);
+            Assert.Equal(expectedError, resultValue);
+        }
+
+        [Fact]
+        public async Task GetAllBooks_ReturnsOkResult_WithBooksList()
+        {
+            // Arrange
+            var books = new List<Book>
+            {
+                new Book
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Test Title 1",
+                    Author = "Test Author 1",
+                    Genre = "Test Genre 1",
+                    PublishDate = DateTime.UtcNow,
+                    Status = true
+                },
+                new Book
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Test Title 2",
+                    Author = "Test Author 2",
+                    Genre = "Test Genre 2",
+                    PublishDate = DateTime.UtcNow,
+                    Status = true
+                }
+            };
+            _mockAppServices.Setup(service => service.GetAllBooksAsync())
+                .ReturnsAsync(Result.Ok(books));
+
+            // Act
+            var result = await _controller.GetAllBooks();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var resultValue = Assert.IsType<Result<List<Book>>>(okResult.Value);
+            Assert.True(resultValue.IsSuccess);
+            Assert.Equal(2, resultValue.Value.Count);
+        }
+
+        [Fact]
+        public async Task GetAllBooks_ReturnsBadRequest_WhenServiceFails()
+        {
+            // Arrange
+            var expectedError = new Error("Service failed");
+            _mockAppServices.Setup(service => service.GetAllBooksAsync())
+                .ReturnsAsync(Result.Fail<List<Book>>(expectedError));
+
+            // Act
+            var result = await _controller.GetAllBooks();
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var resultValue = Assert.IsType<Error>(badRequestResult.Value);
             Assert.Equal(expectedError, resultValue);
         }
     }

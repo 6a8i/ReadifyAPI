@@ -2,6 +2,7 @@
 using Readify.Application.Features.Books.V1.Infrastructure.Entities;
 using Readify.Infrastructure.Commons.DatabaseContexts.V1;
 using Readify.Infrastructure.Contexts.Books.V1.Repositories;
+using System.Diagnostics.Metrics;
 
 namespace Readify.UnitTests.Features.Books.V1.Repositories
 {
@@ -40,6 +41,58 @@ namespace Readify.UnitTests.Features.Books.V1.Repositories
             // Assert
             Assert.NotNull(result);
             Assert.Equal(book.Id, result);
+        }
+
+        [Fact]
+        public async Task GetAllAsync_ReturnsListOfBooks_WhenBooksExist()
+        {
+            // Arrange
+            var count = _context.Books.Count();
+
+            var book1 = new Book
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Title 1",
+                Author = "Test Author 1",
+                Genre = "Test Genre 1",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            
+            var book2 = new Book
+            {
+                Id = Guid.NewGuid(),
+                Title = "Test Title 2",
+                Author = "Test Author 2",
+                Genre = "Test Genre 2",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            
+            await _context.Books.AddRangeAsync(book1, book2);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _booksRepository.GetAllAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(count+2, result.Count);
+        }
+
+        [Fact]
+        public async Task GetAllAsync_ReturnsEmptyList_WhenNoBooksExist()
+        {
+            // Arrange
+            await _context.Books.ForEachAsync(b => _context.Remove(b));
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _booksRepository.GetAllAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
         }
     }
 }
