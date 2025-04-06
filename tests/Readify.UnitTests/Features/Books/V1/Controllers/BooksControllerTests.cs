@@ -173,5 +173,71 @@ namespace Readify.UnitTests.Features.Books.V1.Controllers
             var resultValue = Assert.IsType<Error>(badRequestResult.Value);
             Assert.Equal(expectedError, resultValue);
         }
+
+        [Fact]
+        public async Task UpdateBookById_ReturnsOkResult_WithUpdatedBook()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var request = new UpdateBookRequest
+            {
+                Title = "Updated Title",
+                Author = "Updated Author",
+                Genre = "Updated Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            var updatedBook = new Book
+            {
+                Id = bookId,
+                Title = request.Title,
+                Author = request.Author,
+                Genre = request.Genre,
+                PublishDate = request.PublishDate.Value,
+                Status = request.Status.Value
+            };
+            _mockAppServices.Setup(service => service.UpdateBookByIdAsync(bookId, request))
+                .ReturnsAsync(Result.Ok(updatedBook));
+
+            // Act
+            var result = await _controller.UpdateBookById(bookId, request);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var resultValue = Assert.IsType<Result<Book>>(okResult.Value);
+            Assert.True(resultValue.IsSuccess);
+            Assert.Equal(bookId, resultValue.Value.Id);
+            Assert.Equal(request.Title, resultValue.Value.Title);
+            Assert.Equal(request.Author, resultValue.Value.Author);
+            Assert.Equal(request.Genre, resultValue.Value.Genre);
+            Assert.Equal(request.PublishDate, resultValue.Value.PublishDate);
+            Assert.Equal(request.Status, resultValue.Value.Status);
+        }
+
+        [Fact]
+        public async Task UpdateBookById_ReturnsBadRequest_WhenServiceFails()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var request = new UpdateBookRequest
+            {
+                Title = "Updated Title",
+                Author = "Updated Author",
+                Genre = "Updated Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            var expectedError = new Error("Service failed");
+            _mockAppServices.Setup(service => service.UpdateBookByIdAsync(bookId, request))
+                .ReturnsAsync(Result.Fail<Book>(expectedError));
+
+            // Act
+            var result = await _controller.UpdateBookById(bookId, request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var resultValue = Assert.IsType<List<IError>>(badRequestResult.Value);
+            Assert.Contains(expectedError, resultValue);
+        }
     }
 }

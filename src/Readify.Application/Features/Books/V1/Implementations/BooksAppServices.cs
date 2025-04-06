@@ -43,5 +43,38 @@ namespace Readify.Application.Features.Books.V1.Implementations
 
             return ((Models.Responses.Book)book).ToResult();
         }
+
+        public async Task<Result<Models.Responses.Book>> UpdateBookByIdAsync(Guid id, UpdateBookRequest request)
+        {
+            if (request is null)
+                return Result.Fail("The request can't be null.");
+
+            var entity = await _booksRepository.GetBookByIdAsync(id);
+
+            if(entity is null)
+                return Result.Fail("Book not found!");
+
+            if (!string.IsNullOrEmpty(request.Title))
+                entity.Title = request.Title;
+
+            if (!string.IsNullOrEmpty(request.Author))
+                entity.Author = request.Author;
+
+            if (!string.IsNullOrEmpty(request.Genre))
+                entity.Genre = request.Genre;
+
+            if (request.PublishDate is not null && request.PublishDate > DateTime.MinValue && request.PublishDate < DateTime.MaxValue)
+                entity.PublishDate = request.PublishDate!.Value;
+
+            if(request.Status is not null)
+                entity.Status = request.Status!.Value;  
+
+            Book? result = await _booksRepository.UpdateAsync(entity);
+
+            if (result is null)
+                return Result.Fail("Something went wrong! Try again later.");
+
+            return ((Models.Responses.Book)result).ToResult();
+        }
     }
 }

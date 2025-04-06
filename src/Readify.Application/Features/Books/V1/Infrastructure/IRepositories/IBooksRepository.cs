@@ -7,5 +7,6 @@ namespace Readify.Application.Features.Books.V1.Infrastructure.IRepositories
         Task<Guid?> AddAsync(Book entity);
         Task<List<Book>> GetAllAsync();
         Task<Book?> GetBookByIdAsync(Guid id);
+        Task<Book?> UpdateAsync(Book entity);
     }
 }
