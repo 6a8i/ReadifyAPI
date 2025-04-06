@@ -214,5 +214,127 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
             Assert.True(result.IsFailed);
             Assert.Equal("Book not found!", result.Errors.First().Message);
         }
+
+        [Fact]
+        public async Task UpdateBookByIdAsync_ReturnsSuccessResult_WithUpdatedBook()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var request = new UpdateBookRequest
+            {
+                Title = "Updated Title",
+                Author = "Updated Author",
+                Genre = "Updated Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            var existingBook = new Book
+            {
+                Id = bookId,
+                Title = "Original Title",
+                Author = "Original Author",
+                Genre = "Original Genre",
+                PublishDate = DateTime.UtcNow.AddDays(-1),
+                Status = false
+            };
+            var updatedBook = new Book
+            {
+                Id = bookId,
+                Title = request.Title,
+                Author = request.Author,
+                Genre = request.Genre,
+                PublishDate = request.PublishDate.Value,
+                Status = request.Status.Value
+            };
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync(existingBook);
+            _mockBooksRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Book>()))
+                .ReturnsAsync(updatedBook);
+
+            // Act
+            var result = await _booksAppServices.UpdateBookByIdAsync(bookId, request);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(bookId, result.Value.Id);
+            Assert.Equal(request.Title, result.Value.Title);
+            Assert.Equal(request.Author, result.Value.Author);
+            Assert.Equal(request.Genre, result.Value.Genre);
+            Assert.Equal(request.PublishDate, result.Value.PublishDate);
+            Assert.Equal(request.Status, result.Value.Status);
+        }
+
+        [Fact]
+        public async Task UpdateBookByIdAsync_ReturnsFailureResult_WhenRequestIsNull()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+
+            // Act
+            var result = await _booksAppServices.UpdateBookByIdAsync(bookId, null);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("The request can't be null.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task UpdateBookByIdAsync_ReturnsFailureResult_WhenBookNotFound()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var request = new UpdateBookRequest
+            {
+                Title = "Updated Title",
+                Author = "Updated Author",
+                Genre = "Updated Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _booksAppServices.UpdateBookByIdAsync(bookId, request);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Book not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task UpdateBookByIdAsync_ReturnsFailureResult_WhenUpdateFails()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var request = new UpdateBookRequest
+            {
+                Title = "Updated Title",
+                Author = "Updated Author",
+                Genre = "Updated Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            var existingBook = new Book
+            {
+                Id = bookId,
+                Title = "Original Title",
+                Author = "Original Author",
+                Genre = "Original Genre",
+                PublishDate = DateTime.UtcNow.AddDays(-1),
+                Status = false
+            };
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync(existingBook);
+            _mockBooksRepository.Setup(repo => repo.UpdateAsync(It.IsAny<Book>()))
+                .ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _booksAppServices.UpdateBookByIdAsync(bookId, request);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Something went wrong! Try again later.", result.Errors.First().Message);
+        }
     }
 }
