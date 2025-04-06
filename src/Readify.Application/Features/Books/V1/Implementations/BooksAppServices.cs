@@ -33,5 +33,15 @@ namespace Readify.Application.Features.Books.V1.Implementations
 
             return books.Select(b => (Models.Responses.Book)b).ToList().ToResult();
         }
+
+        public async Task<Result<Models.Responses.Book>> GetBookByIdAsync(Guid id)
+        {
+            Book? book = await _booksRepository.GetBookByIdAsync(id);
+
+            if (book is null)
+                return Result.Fail("Book not found!");
+
+            return ((Models.Responses.Book)book).ToResult();
+        }
     }
 }

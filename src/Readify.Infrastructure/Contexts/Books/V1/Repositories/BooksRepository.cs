@@ -27,5 +27,12 @@ namespace Readify.Infrastructure.Contexts.Books.V1.Repositories
 
             return result;
         }
+
+        public async Task<Book?> GetBookByIdAsync(Guid id)
+        {
+            var result = await _context.Books.FirstOrDefaultAsync(b => b.Id == id);
+
+            return result;
+        }
     }
 }

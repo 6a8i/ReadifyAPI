@@ -37,5 +37,16 @@ namespace Readify.API.Features.Books.V1.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetBookById(Guid id)
+        {
+            Result<Book> result = await _appServices.GetBookByIdAsync(id);
+
+            if (result.IsFailed)
+                return BadRequest(result.Errors.FirstOrDefault());
+
+            return Ok(result);
+        }
+
     }
 }

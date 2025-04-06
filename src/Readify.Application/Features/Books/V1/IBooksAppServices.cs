@@ -8,5 +8,6 @@ namespace Readify.Application.Features.Books.V1
     {
         Task<Result<Guid>> CreateABookAsync(AddBookRequest request);
         Task<Result<List<Book>>> GetAllBooksAsync();
+        Task<Result<Book>> GetBookByIdAsync(Guid id);
     }
 }
