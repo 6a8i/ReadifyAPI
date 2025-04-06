@@ -9,7 +9,6 @@ namespace Readify.Application.Features.Books.V1.Implementations
     {
         private readonly IBooksRepository _booksRepository = booksRepository;
 
-
         public async Task<Result<Guid>> CreateABookAsync(AddBookRequest request)
         {
             if (string.IsNullOrEmpty(request.Title) || string.IsNullOrEmpty(request.Author) || string.IsNullOrEmpty(request.Genre) || request.PublishDate == DateTime.MinValue || request.PublishDate == DateTime.MaxValue)
@@ -23,6 +22,16 @@ namespace Readify.Application.Features.Books.V1.Implementations
                 return Result.Fail("Something went wrong! Try again later.");
 
             return id.Value.ToResult();
+        }
+
+        public async Task<Result<List<Models.Responses.Book>>> GetAllBooksAsync()
+        {
+            List<Book> books = await _booksRepository.GetAllAsync();
+
+            if (books is null || books.Count == 0)
+                return Result.Fail("No books found!");
+
+            return books.Select(b => (Models.Responses.Book)b).ToList().ToResult();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Readify.Application.Features.Books.V1.Infrastructure.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using Readify.Application.Features.Books.V1.Infrastructure.Entities;
 using Readify.Application.Features.Books.V1.Infrastructure.IRepositories;
 using Readify.Infrastructure.Commons.DatabaseContexts.V1;
 
@@ -18,6 +19,13 @@ namespace Readify.Infrastructure.Contexts.Books.V1.Repositories
                 return entity.Id;
             else
                 return null;
+        }
+
+        public async Task<List<Book>> GetAllAsync()
+        {
+            var result = await _context.Books.ToListAsync();
+
+            return result;
         }
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Readify.API.Common.Controllers;
 using Readify.Application.Features.Books.V1;
 using Readify.Application.Features.Books.V1.Models.Requests;
+using Readify.Application.Features.Books.V1.Models.Responses;
 
 namespace Readify.API.Features.Books.V1.Controllers
 {
@@ -24,5 +25,17 @@ namespace Readify.API.Features.Books.V1.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllBooks()
+        {
+            Result<List<Book>> result = await _appServices.GetAllBooksAsync();
+
+            if (result.IsFailed)
+                return BadRequest(result.Errors.FirstOrDefault());
+
+            return Ok(result);
+        }
+
     }
 }
