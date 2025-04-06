@@ -107,5 +107,71 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
             Assert.True(result.IsFailed);
             Assert.Equal("Something went wrong! Try again later.", result.Errors[0].Message);
         }
+
+        [Fact]
+        public async Task GetAllBooksAsync_ReturnsSuccessResult_WithBooksList()
+        {
+            // Arrange
+            var books = new List<Book>
+            {
+                new Book
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Test Title 1",
+                    Author = "Test Author 1",
+                    Genre = "Test Genre 1",
+                    PublishDate = DateTime.UtcNow,
+                    Status = true
+                },
+                new Book
+                {
+                    Id = Guid.NewGuid(),
+                    Title = "Test Title 2",
+                    Author = "Test Author 2",
+                    Genre = "Test Genre 2",
+                    PublishDate = DateTime.UtcNow,
+                    Status = true
+                }
+            };
+            _mockBooksRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(books);
+
+            // Act
+            var result = await _booksAppServices.GetAllBooksAsync();
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(2, result.Value.Count);
+        }
+
+        [Fact]
+        public async Task GetAllBooksAsync_ReturnsFailureResult_WhenNoBooksFound()
+        {
+            // Arrange
+            _mockBooksRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(new List<Book>());
+
+            // Act
+            var result = await _booksAppServices.GetAllBooksAsync();
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("No books found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetAllBooksAsync_ReturnsFailureResult_WhenRepositoryReturnsNull()
+        {
+            // Arrange
+            _mockBooksRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync((List<Book>)null);
+
+            // Act
+            var result = await _booksAppServices.GetAllBooksAsync();
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("No books found!", result.Errors.First().Message);
+        }
     }
 }
