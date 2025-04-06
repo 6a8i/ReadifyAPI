@@ -1,6 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Moq;
 using Readify.Application.Features.Books.V1.Infrastructure.Entities;
 using Readify.Infrastructure.Commons.DatabaseContexts.V1;
 using Readify.Infrastructure.Contexts.Books.V1.Repositories;
