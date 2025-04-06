@@ -10,12 +10,14 @@
     <Folder Include="Commons\Authentication\V1\Infrastructure\Entities\" />
     <Folder Include="Commons\Authentication\V1\Models\Responses\" />
     <Folder Include="Commons\Authentication\V1\Models\Requests\" />
-    <Folder Include="Features\Books\V1\Infrastructure\Entities\" />
     <Folder Include="Features\Books\V1\Models\Responses\" />
-    <Folder Include="Features\Books\V1\Models\Requests\" />
     <Folder Include="Features\Users\V1\Infrastructure\Entities\" />
     <Folder Include="Features\Users\V1\Models\Responses\" />
     <Folder Include="Features\Users\V1\Models\Requests\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentResults" Version="3.16.0" />
   </ItemGroup>
 
 </Project>
