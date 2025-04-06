@@ -173,5 +173,46 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
             Assert.True(result.IsFailed);
             Assert.Equal("No books found!", result.Errors.First().Message);
         }
+
+        [Fact]
+        public async Task GetBookByIdAsync_ReturnsSuccessResult_WithBook()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var book = new Book
+            {
+                Id = bookId,
+                Title = "Test Title",
+                Author = "Test Author",
+                Genre = "Test Genre",
+                PublishDate = DateTime.UtcNow,
+                Status = true
+            };
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync(book);
+
+            // Act
+            var result = await _booksAppServices.GetBookByIdAsync(bookId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(bookId, result.Value.Id);
+        }
+
+        [Fact]
+        public async Task GetBookByIdAsync_ReturnsFailureResult_WhenBookNotFound()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            _mockBooksRepository.Setup(repo => repo.GetBookByIdAsync(bookId))
+                .ReturnsAsync((Book)null);
+
+            // Act
+            var result = await _booksAppServices.GetBookByIdAsync(bookId);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Book not found!", result.Errors.First().Message);
+        }
     }
 }
