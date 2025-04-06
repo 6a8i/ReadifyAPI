@@ -19,6 +19,9 @@ namespace Readify.API.Features.Books.V1.Controllers
         {
             Result<Guid> result = await _appServices.CreateABookAsync(request);
 
+            if(result.IsFailed)
+                return BadRequest(result.Errors.FirstOrDefault());
+
             return Ok(result);
         }
     }

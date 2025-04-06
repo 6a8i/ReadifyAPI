@@ -7,10 +7,13 @@ namespace Readify.Infrastructure.Commons.DatabaseContexts.V1
     {
         public ReadifyDatabaseContext(DbContextOptions<ReadifyDatabaseContext> options) : base(options)
         {
-            Database.EnsureCreated();
-            Database.Migrate();
+            if (Database.IsRelational())
+            {
+                Database.EnsureCreated();
+                Database.Migrate();
+            }            
         }
 
-        public DbSet<Book> Books { get; set; } 
+        public virtual DbSet<Book> Books { get; set; } 
     }
 }

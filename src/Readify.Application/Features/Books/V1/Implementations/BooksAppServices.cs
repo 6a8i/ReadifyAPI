@@ -13,14 +13,14 @@ namespace Readify.Application.Features.Books.V1.Implementations
         public async Task<Result<Guid>> CreateABookAsync(AddBookRequest request)
         {
             if (string.IsNullOrEmpty(request.Title) || string.IsNullOrEmpty(request.Author) || string.IsNullOrEmpty(request.Genre) || request.PublishDate == DateTime.MinValue || request.PublishDate == DateTime.MaxValue)
-                return new Result().WithError("All fields are required");
+                return Result.Fail("All fields are required");
 
             var entity = (Book)request;
 
             Guid? id = await _booksRepository.AddAsync(entity);
 
             if (id is null)
-                return new Result().WithError("Something went wrong! Try again later.");
+                return Result.Fail("Something went wrong! Try again later.");
 
             return id.Value.ToResult();
         }

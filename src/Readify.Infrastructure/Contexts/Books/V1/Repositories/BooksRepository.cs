@@ -4,7 +4,7 @@ using Readify.Infrastructure.Commons.DatabaseContexts.V1;
 
 namespace Readify.Infrastructure.Contexts.Books.V1.Repositories
 {
-    class BooksRepository(ReadifyDatabaseContext context) : IBooksRepository
+    public class BooksRepository(ReadifyDatabaseContext context) : IBooksRepository
     {
         private readonly ReadifyDatabaseContext _context = context;
 

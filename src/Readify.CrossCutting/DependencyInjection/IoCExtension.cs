@@ -2,11 +2,13 @@
 using Readify.Infrastructure.Commons.DatabaseContexts.V1;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Readify.Application.Commons.Authentication.V1.Implementations;
 
 namespace Readify.CrossCutting.DependencyInjection
 {
     public static class IoCExtension
     {
+        private readonly static AuthenticationAppServices auth; // This is only to get the explicit reference to the Application layer, so that the IoC container can be registered properly.
         public static IServiceCollection AddIoC(this IServiceCollection services, ConfigurationManager configuration)
         {
             services.AddAppServices();
