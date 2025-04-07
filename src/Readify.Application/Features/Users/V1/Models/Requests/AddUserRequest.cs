@@ -1,5 +1,4 @@
-﻿using Readify.Application.Features.Books.V1.Models.Requests;
-using Readify.Application.Features.Users.V1.Infrastructure.Entities;
+﻿using Readify.Application.Features.Users.V1.Infrastructure.Entities;
 
 namespace Readify.Application.Features.Users.V1.Models.Requests
 {
