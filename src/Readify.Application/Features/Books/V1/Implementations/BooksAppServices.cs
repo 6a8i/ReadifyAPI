@@ -27,7 +27,7 @@ namespace Readify.Application.Features.Books.V1.Implementations
         public async Task<Result> DeleteBookByIdAsync(Guid id)
         {
             if (id == Guid.Empty)
-                return Result.Fail("The id can't be empty.");
+                return Result.Fail("The id cannot be empty.");
 
             var entity = await _booksRepository.GetBookByIdAsync(id);
 
