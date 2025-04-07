@@ -348,7 +348,7 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
 
             // Assert
             Assert.True(result.IsFailed);
-            Assert.Equal("The id can't be empty.", result.Errors.First().Message);
+            Assert.Equal("The id cannot be empty.", result.Errors.First().Message);
         }
 
         [Fact]
