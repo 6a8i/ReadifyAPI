@@ -206,5 +206,75 @@ namespace Readify.UnitTests.Features.Users.V1.ApplicationServices
             Assert.True(result.IsFailed);
             Assert.Equal("Something went wrong! Try again later.", result.Errors.First().Message);
         }
+
+        [Fact]
+        public async Task GetAllUsersAsync_ReturnsFailureResult_WhenNoUsersFound()
+        {
+            // Arrange
+            _mockUsersRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(new List<User>());
+
+            // Act
+            var result = await _usersAppServices.GetAllUsersAsync();
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("No users found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetAllUsersAsync_ReturnsFailureResult_WhenRepositoryReturnsNull()
+        {
+            // Arrange
+            _mockUsersRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync((List<User>)null);
+
+            // Act
+            var result = await _usersAppServices.GetAllUsersAsync();
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("No users found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetAllUsersAsync_ReturnsSuccessResult_WithUsersList()
+        {
+            // Arrange
+            var users = new List<User>
+            {
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Test User 1",
+                    Email = "test.user1@example.com",
+                    BirthDate = DateTime.UtcNow.AddYears(-30),
+                    Password = "Password123",
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true
+                },
+                new User
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Test User 2",
+                    Email = "test.user2@example.com",
+                    BirthDate = DateTime.UtcNow.AddYears(-25),
+                    Password = "Password123",
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true
+                }
+            };
+            _mockUsersRepository.Setup(repo => repo.GetAllAsync())
+                .ReturnsAsync(users);
+
+            // Act
+            var result = await _usersAppServices.GetAllUsersAsync();
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(2, result.Value.Count);
+            Assert.Equal(users[0].Id, result.Value[0].Id);
+            Assert.Equal(users[1].Id, result.Value[1].Id);
+        }
     }
 }

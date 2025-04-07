@@ -69,5 +69,59 @@ namespace Readify.UnitTests.Features.Users.V1.Repositories
             Assert.Equal(user.BirthDate, addedUser.BirthDate);
             Assert.Equal(user.IsActive, addedUser.IsActive);
         }
+
+        [Fact]
+        public async Task GetAllAsync_ReturnsListOfUsers_WhenUsersExist()
+        {
+            // Arrange
+            var user1 = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test User 1",
+                Email = "test.user1@example.com",
+                Password = "Password123",
+                BirthDate = DateTime.UtcNow.AddYears(-30),
+                IsActive = true
+            };
+
+            var user2 = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Test User 2",
+                Email = "test.user2@example.com",
+                Password = "Password123",
+                BirthDate = DateTime.UtcNow.AddYears(-25),
+                IsActive = true
+            };
+
+            await _context.Users.AddRangeAsync(user1, user2);
+            await _context.SaveChangesAsync();
+            
+            var userCountAfterInsert = await _context.Users.CountAsync();  
+
+            // Act
+            var result = await _usersRepository.GetAllAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(userCountAfterInsert, result.Count);
+            Assert.Contains(result, u => u.Id == user1.Id);
+            Assert.Contains(result, u => u.Id == user2.Id);
+        }
+
+        [Fact]
+        public async Task GetAllAsync_ReturnsEmptyList_WhenNoUsersExist()
+        {
+            //Arrange
+            await _context.Users.ForEachAsync(user => _context.Remove(user));
+            await _context.SaveChangesAsync(); 
+
+            // Act
+            var result = await _usersRepository.GetAllAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
     }
 }
