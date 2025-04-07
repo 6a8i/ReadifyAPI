@@ -47,5 +47,16 @@ namespace Readify.API.Features.Users.V1.Controllers
 
             return Ok(result);
         }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateUser(Guid id, UpdateUserRequest request)
+        { 
+            Result<GetUserResponse> result = await _usersAppServices.UpdateUserByIdAsync(id, request);
+
+            if (result.IsFailed)
+                return BadRequest(result.Errors);
+
+            return Ok(result);
+        }
     }
 }

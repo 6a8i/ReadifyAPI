@@ -162,5 +162,68 @@ namespace Readify.UnitTests.Features.Users.V1.Controllers
             var resultValue = Assert.IsType<Error>(badRequestResult.Value);
             Assert.Equal(expectedError, resultValue);
         }
+
+        [Fact]
+        public async Task UpdateUser_ReturnsOkResult_WithUpdatedUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var request = new UpdateUserRequest
+            {
+                Name = "Updated User",
+                Email = "updated.user@example.com",
+                Password = "UpdatedPassword123",
+                IsActive = true,
+                BirthDate = DateTime.UtcNow.AddYears(-25)
+            };
+            var updatedUser = new GetUserResponse
+            {
+                Id = userId,
+                Name = request.Name,
+                Email = request.Email,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = request.IsActive.Value
+            };
+            _mockUsersAppServices.Setup(service => service.UpdateUserByIdAsync(userId, request))
+                .ReturnsAsync(Result.Ok(updatedUser));
+
+            // Act
+            var result = await _controller.UpdateUser(userId, request);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var resultValue = Assert.IsType<Result<GetUserResponse>>(okResult.Value);
+            Assert.True(resultValue.IsSuccess);
+            Assert.Equal(userId, resultValue.Value.Id);
+            Assert.Equal(request.Name, resultValue.Value.Name);
+            Assert.Equal(request.Email, resultValue.Value.Email);
+            Assert.Equal(request.IsActive, resultValue.Value.IsActive);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ReturnsBadRequest_WhenServiceFails()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var request = new UpdateUserRequest
+            {
+                Name = "Updated User",
+                Email = "updated.user@example.com",
+                Password = "UpdatedPassword123",
+                IsActive = true,
+                BirthDate = DateTime.UtcNow.AddYears(-25)
+            };
+            var expectedError = new Error("Service failed");
+            _mockUsersAppServices.Setup(service => service.UpdateUserByIdAsync(userId, request))
+                .ReturnsAsync(Result.Fail<GetUserResponse>(expectedError));
+
+            // Act
+            var result = await _controller.UpdateUser(userId, request);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var resultValue = Assert.IsType<List<IError>>(badRequestResult.Value);
+            Assert.Contains(expectedError, resultValue);
+        }
     }
 }

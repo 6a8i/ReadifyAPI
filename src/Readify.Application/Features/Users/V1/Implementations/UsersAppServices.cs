@@ -72,5 +72,38 @@ namespace Readify.Application.Features.Users.V1.Implementations
 
             return (GetUserResponse)user;
         }
+
+        public async Task<Result<GetUserResponse>> UpdateUserByIdAsync(Guid id, UpdateUserRequest request)
+        {
+            if (id == Guid.Empty)
+                return Result.Fail("The id cannot be empty.");
+
+            User? user = await _usersRepository.GetUserByIdAsync(id);
+
+            if (user is null)
+                return Result.Fail("User not found!");
+
+            if(!string.IsNullOrEmpty(request.Email))
+                user.Email = request.Email;
+
+            if (!string.IsNullOrEmpty(request.Name))
+                user.Name = request.Name;
+
+            if (!string.IsNullOrEmpty(request.Password))
+                user.Password = request.Password;
+
+            if (request.IsActive is not null)
+                user.IsActive = request.IsActive.Value;
+
+            if (request.BirthDate is not null && request.BirthDate > DateTime.UtcNow.AddYears(-150) && request.BirthDate < DateTime.UtcNow)
+                user.BirthDate = request.BirthDate.Value;
+
+            bool result = await _usersRepository.UpdateAsync(user);
+
+            if (!result)
+                return Result.Fail("Something went wrong! Try again later.");
+            
+            return (GetUserResponse)user;
+        }
     }
 }
