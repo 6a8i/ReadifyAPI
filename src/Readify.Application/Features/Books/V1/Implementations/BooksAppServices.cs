@@ -24,6 +24,27 @@ namespace Readify.Application.Features.Books.V1.Implementations
             return id.Value.ToResult();
         }
 
+        public async Task<Result> DeleteBookByIdAsync(Guid id)
+        {
+            if (id == Guid.Empty)
+                return Result.Fail("The id cannot be empty.");
+
+            var entity = await _booksRepository.GetBookByIdAsync(id);
+
+            if(entity is null)
+                return Result.Fail("Book not found!");
+
+            if (!entity.Status)
+                return Result.Fail("Book cannot be deleted as it is currently borrowed.");
+
+            bool result = await _booksRepository.DeleteAsync(entity);
+
+            if(!result)
+                return Result.Fail("Something went wrong! Try again later.");
+
+            return Result.Ok().WithSuccess($"The book {entity.Title} of id: {entity.Id} was successfully deleted!");
+        }
+
         public async Task<Result<List<Models.Responses.Book>>> GetAllBooksAsync()
         {
             List<Book> books = await _booksRepository.GetAllAsync();

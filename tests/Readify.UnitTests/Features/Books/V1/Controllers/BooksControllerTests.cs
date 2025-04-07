@@ -239,5 +239,40 @@ namespace Readify.UnitTests.Features.Books.V1.Controllers
             var resultValue = Assert.IsType<List<IError>>(badRequestResult.Value);
             Assert.Contains(expectedError, resultValue);
         }
+
+        [Fact]
+        public async Task DeleteBookById_ReturnsOkResult_WhenDeletionIsSuccessful()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            _mockAppServices.Setup(service => service.DeleteBookByIdAsync(bookId))
+                .ReturnsAsync(Result.Ok());
+
+            // Act
+            var result = await _controller.DeleteBookById(bookId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var resultValue = Assert.IsType<Result>(okResult.Value);
+            Assert.True(resultValue.IsSuccess);
+        }
+
+        [Fact]
+        public async Task DeleteBookById_ReturnsBadRequest_WhenDeletionFails()
+        {
+            // Arrange
+            var bookId = Guid.NewGuid();
+            var expectedError = new Error("Deletion failed");
+            _mockAppServices.Setup(service => service.DeleteBookByIdAsync(bookId))
+                .ReturnsAsync(Result.Fail(expectedError));
+
+            // Act
+            var result = await _controller.DeleteBookById(bookId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var resultValue = Assert.IsType<List<IError>>(badRequestResult.Value);
+            Assert.Contains(expectedError, resultValue);
+        }
     }
 }
