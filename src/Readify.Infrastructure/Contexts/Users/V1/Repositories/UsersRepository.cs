@@ -34,6 +34,12 @@ namespace Readify.Infrastructure.Contexts.Users.V1.Repositories
             return entity;
         }
 
+        public async Task<User?> GetUserByIdAsync(Guid id)
+        {
+            var result = await _context.Users.FirstOrDefaultAsync(b => b.Id == id);
+            return result;
+        }
+
         public async Task<bool> UpdateAsync(User entity)
         {
             var result = await _context

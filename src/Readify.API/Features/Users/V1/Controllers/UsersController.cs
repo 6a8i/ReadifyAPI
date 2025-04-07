@@ -36,5 +36,16 @@ namespace Readify.API.Features.Users.V1.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(Guid id)
+        {
+            Result<GetUserResponse> result = await _usersAppServices.GetUserByIdAsync(id);
+
+            if (result.IsFailed)
+                return BadRequest(result.Errors.FirstOrDefault());
+
+            return Ok(result);
+        }
     }
 }
