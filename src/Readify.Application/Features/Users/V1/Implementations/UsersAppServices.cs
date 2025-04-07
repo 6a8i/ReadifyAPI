@@ -2,6 +2,7 @@
 using Readify.Application.Features.Users.V1.Infrastructure.Entities;
 using Readify.Application.Features.Users.V1.Infrastructure.IRepositories;
 using Readify.Application.Features.Users.V1.Models.Requests;
+using Readify.Application.Features.Users.V1.Models.Responses;
 
 namespace Readify.Application.Features.Users.V1.Implementations
 {
@@ -47,6 +48,16 @@ namespace Readify.Application.Features.Users.V1.Implementations
 
                 return Result.Ok(id);
             }
+        }
+
+        public async Task<Result<List<GetUserResponse>>> GetAllUsersAsync()
+        {
+            List<User> users = await _usersRepository.GetAllAsync();
+
+            if (users is null || users.Count == 0)
+                return Result.Fail("No users found!");
+
+            return users.Select(user => (GetUserResponse)user).ToList().ToResult();
         }
     }
 }
