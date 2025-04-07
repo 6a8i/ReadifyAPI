@@ -333,5 +333,109 @@ namespace Readify.UnitTests.Features.Users.V1.ApplicationServices
             Assert.Equal(user.CreatedAt, result.Value.CreatedAt);
             Assert.Equal(user.IsActive, result.Value.IsActive);
         }
+
+        [Fact]
+        public async Task UpdateUserByIdAsync_ReturnsFailureResult_WhenIdIsEmpty()
+        {
+            // Arrange
+            var request = new UpdateUserRequest();
+
+            // Act
+            var result = await _usersAppServices.UpdateUserByIdAsync(Guid.Empty, request);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("The id cannot be empty.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task UpdateUserByIdAsync_ReturnsFailureResult_WhenUserNotFound()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var request = new UpdateUserRequest();
+            _mockUsersRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+                .ReturnsAsync((User)null);
+
+            // Act
+            var result = await _usersAppServices.UpdateUserByIdAsync(userId, request);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("User not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task UpdateUserByIdAsync_ReturnsFailureResult_WhenUpdateFails()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var request = new UpdateUserRequest
+            {
+                Name = "Updated User",
+                Email = "updated.user@example.com",
+                Password = "UpdatedPassword123",
+                IsActive = true,
+                BirthDate = DateTime.UtcNow.AddYears(-25)
+            };
+            var existingUser = new User
+            {
+                Id = userId,
+                Name = "Test User",
+                Email = "test.user@example.com",
+                Password = "Password123",
+                BirthDate = DateTime.UtcNow.AddYears(-30),
+                IsActive = true
+            };
+            _mockUsersRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+                .ReturnsAsync(existingUser);
+            _mockUsersRepository.Setup(repo => repo.UpdateAsync(It.IsAny<User>()))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _usersAppServices.UpdateUserByIdAsync(userId, request);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Something went wrong! Try again later.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task UpdateUserByIdAsync_ReturnsSuccessResult_WithUpdatedUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var request = new UpdateUserRequest
+            {
+                Name = "Updated User",
+                Email = "updated.user@example.com",
+                Password = "UpdatedPassword123",
+                IsActive = true,
+                BirthDate = DateTime.UtcNow.AddYears(-25)
+            };
+            var existingUser = new User
+            {
+                Id = userId,
+                Name = "Test User",
+                Email = "test.user@example.com",
+                Password = "Password123",
+                BirthDate = DateTime.UtcNow.AddYears(-30),
+                IsActive = true
+            };
+            _mockUsersRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+                .ReturnsAsync(existingUser);
+            _mockUsersRepository.Setup(repo => repo.UpdateAsync(It.IsAny<User>()))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _usersAppServices.UpdateUserByIdAsync(userId, request);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(userId, result.Value.Id);
+            Assert.Equal(request.Name, result.Value.Name);
+            Assert.Equal(request.Email, result.Value.Email);
+            Assert.Equal(request.IsActive, result.Value.IsActive);
+        }
     }
 }

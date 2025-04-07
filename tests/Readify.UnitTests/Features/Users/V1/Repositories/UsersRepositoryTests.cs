@@ -8,16 +8,24 @@ namespace Readify.UnitTests.Features.Users.V1.Repositories
     public class UsersRepositoryTests
     {
         private readonly DbContextOptions<ReadifyDatabaseContext> _dbContextOptions;
+        private readonly DbContextOptions<ReadifyDatabaseContext> _emptydbContextOptions;
         private readonly ReadifyDatabaseContext _context;
+        private readonly ReadifyDatabaseContext _emptyContext;
         private readonly UsersRepository _usersRepository;
+        private readonly UsersRepository _usersRepositoryEmpty;
 
         public UsersRepositoryTests()
         {
             _dbContextOptions = new DbContextOptionsBuilder<ReadifyDatabaseContext>()
                 .UseInMemoryDatabase(databaseName: "ReadifyTestDb")
                 .Options;
+            _emptydbContextOptions = new DbContextOptionsBuilder<ReadifyDatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "ReadifyEmptyTestDb")
+                .Options;
             _context = new ReadifyDatabaseContext(_dbContextOptions);
+            _emptyContext = new ReadifyDatabaseContext(_emptydbContextOptions);
             _usersRepository = new UsersRepository(_context);
+            _usersRepositoryEmpty = new UsersRepository(_emptyContext);
         }
 
         [Fact]
@@ -112,12 +120,8 @@ namespace Readify.UnitTests.Features.Users.V1.Repositories
         [Fact]
         public async Task GetAllAsync_ReturnsEmptyList_WhenNoUsersExist()
         {
-            //Arrange
-            await _context.Users.ForEachAsync(user => _context.Remove(user));
-            await _context.SaveChangesAsync(); 
-
             // Act
-            var result = await _usersRepository.GetAllAsync();
+            var result = await _usersRepositoryEmpty.GetAllAsync();
 
             // Assert
             Assert.NotNull(result);
@@ -161,7 +165,7 @@ namespace Readify.UnitTests.Features.Users.V1.Repositories
             var userId = Guid.NewGuid();
 
             // Act
-            var result = await _usersRepository.GetUserByIdAsync(userId);
+            var result = await _usersRepositoryEmpty.GetUserByIdAsync(userId);
 
             // Assert
             Assert.Null(result);
