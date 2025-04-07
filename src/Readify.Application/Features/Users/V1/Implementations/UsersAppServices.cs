@@ -59,5 +59,18 @@ namespace Readify.Application.Features.Users.V1.Implementations
 
             return users.Select(user => (GetUserResponse)user).ToList().ToResult();
         }
+
+        public async Task<Result<GetUserResponse>> GetUserByIdAsync(Guid id)
+        {
+            if (id == Guid.Empty)
+                return Result.Fail("The id cannot be empty.");
+
+            User? user = await _usersRepository.GetUserByIdAsync(id);
+            
+            if (user is null)
+                return Result.Fail("User not found!");
+
+            return (GetUserResponse)user;
+        }
     }
 }

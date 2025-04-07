@@ -123,5 +123,48 @@ namespace Readify.UnitTests.Features.Users.V1.Repositories
             Assert.NotNull(result);
             Assert.Empty(result);
         }
+
+        [Fact]
+        public async Task GetUserByIdAsync_ReturnsUser_WhenUserExists()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var user = new User
+            {
+                Id = userId,
+                Name = "Test User",
+                Email = "test.user@example.com",
+                Password = "Password123",
+                BirthDate = DateTime.UtcNow.AddYears(-30),
+                IsActive = true
+            };
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            // Act
+            var result = await _usersRepository.GetUserByIdAsync(userId);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(userId, result.Id);
+            Assert.Equal(user.Name, result.Name);
+            Assert.Equal(user.Email, result.Email);
+            Assert.Equal(user.Password, result.Password);
+            Assert.Equal(user.BirthDate, result.BirthDate);
+            Assert.Equal(user.IsActive, result.IsActive);
+        }
+
+        [Fact]
+        public async Task GetUserByIdAsync_ReturnsNull_WhenUserDoesNotExist()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+
+            // Act
+            var result = await _usersRepository.GetUserByIdAsync(userId);
+
+            // Assert
+            Assert.Null(result);
+        }
     }
 }

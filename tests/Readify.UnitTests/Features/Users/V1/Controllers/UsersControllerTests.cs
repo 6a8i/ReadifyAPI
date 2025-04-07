@@ -118,5 +118,49 @@ namespace Readify.UnitTests.Features.Users.V1.Controllers
             var resultValue = Assert.IsType<Error>(badRequestResult.Value);
             Assert.Equal(expectedError, resultValue);
         }
+
+        [Fact]
+        public async Task GetUserById_ReturnsOkResult_WithUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var user = new GetUserResponse
+            {
+                Id = userId,
+                Name = "Test User",
+                Email = "test.user@example.com",
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+            _mockUsersAppServices.Setup(service => service.GetUserByIdAsync(userId))
+                .ReturnsAsync(Result.Ok(user));
+
+            // Act
+            var result = await _controller.GetUserById(userId);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var resultValue = Assert.IsType<Result<GetUserResponse>>(okResult.Value);
+            Assert.True(resultValue.IsSuccess);
+            Assert.Equal(userId, resultValue.Value.Id);
+        }
+
+        [Fact]
+        public async Task GetUserById_ReturnsBadRequest_WhenServiceFails()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var expectedError = new Error("Service failed");
+            _mockUsersAppServices.Setup(service => service.GetUserByIdAsync(userId))
+                .ReturnsAsync(Result.Fail<GetUserResponse>(expectedError));
+
+            // Act
+            var result = await _controller.GetUserById(userId);
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var resultValue = Assert.IsType<Error>(badRequestResult.Value);
+            Assert.Equal(expectedError, resultValue);
+        }
     }
 }
