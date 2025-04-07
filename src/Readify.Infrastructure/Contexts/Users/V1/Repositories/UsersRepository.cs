@@ -21,6 +21,12 @@ namespace Readify.Infrastructure.Contexts.Users.V1.Repositories
                 return null;
         }
 
+        public async Task<List<User>> GetAllAsync()
+        {
+            var result = await _context.Users.ToListAsync();
+            return result;
+        }
+
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             var entity = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
