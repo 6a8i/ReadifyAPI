@@ -1,6 +1,11 @@
-﻿namespace Readify.Application.Features.Users.V1.Infrastructure.IRepositories
+﻿using Readify.Application.Features.Users.V1.Infrastructure.Entities;
+
+namespace Readify.Application.Features.Users.V1.Infrastructure.IRepositories
 {
     public interface IUsersRepository
     {
+        Task<Guid?> AddAsync(User entity);
+        Task<User?> GetUserByEmailAsync(string email);
+        Task<bool> UpdateAsync(User entity);
     }
 }

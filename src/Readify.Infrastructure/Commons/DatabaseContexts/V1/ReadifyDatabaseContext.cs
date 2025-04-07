@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Readify.Application.Features.Books.V1.Infrastructure.Entities;
+using Readify.Application.Features.Users.V1.Infrastructure.Entities;
+using Readify.Infrastructure.Contexts.Books.V1.EntitiesConfigurations;
+using Readify.Infrastructure.Contexts.Users.V1.EntitiesConfigurations;
 
 namespace Readify.Infrastructure.Commons.DatabaseContexts.V1
 {
@@ -14,6 +17,16 @@ namespace Readify.Infrastructure.Commons.DatabaseContexts.V1
             }            
         }
 
-        public virtual DbSet<Book> Books { get; set; } 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Aplica as configurações das entidades
+            modelBuilder.ApplyConfiguration(new BookConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+        }
+
+        public virtual DbSet<Book> Books { get; set; }
+        public virtual DbSet<User> Users { get; set; }
     }
 }
