@@ -52,12 +52,12 @@ namespace Readify.Application.Features.Users.V1.Implementations
 
         public async Task<Result<List<GetUserResponse>>> GetAllUsersAsync()
         {
-            List<User> entity = await _usersRepository.GetAllAsync();
+            List<User> users = await _usersRepository.GetAllAsync();
 
-            if (entity is null || entity.Count == 0)
+            if (users is null || users.Count == 0)
                 return Result.Fail("No users found!");
 
-            return entity.Select(user => (GetUserResponse)user).ToList().ToResult();
+            return users.Select(user => (GetUserResponse)user).ToList().ToResult();
         }
     }
 }
