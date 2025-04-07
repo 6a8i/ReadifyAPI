@@ -276,5 +276,62 @@ namespace Readify.UnitTests.Features.Users.V1.ApplicationServices
             Assert.Equal(users[0].Id, result.Value[0].Id);
             Assert.Equal(users[1].Id, result.Value[1].Id);
         }
+
+        [Fact]
+        public async Task GetUserByIdAsync_ReturnsFailureResult_WhenIdIsEmpty()
+        {
+            // Act
+            var result = await _usersAppServices.GetUserByIdAsync(Guid.Empty);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("The id cannot be empty.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetUserByIdAsync_ReturnsFailureResult_WhenUserNotFound()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            _mockUsersRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+                .ReturnsAsync((User)null);
+
+            // Act
+            var result = await _usersAppServices.GetUserByIdAsync(userId);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("User not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetUserByIdAsync_ReturnsSuccessResult_WithUser()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var user = new User
+            {
+                Id = userId,
+                Name = "Test User",
+                Email = "test.user@example.com",
+                BirthDate = DateTime.UtcNow.AddYears(-30),
+                Password = "Password123",
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+            _mockUsersRepository.Setup(repo => repo.GetUserByIdAsync(userId))
+                .ReturnsAsync(user);
+
+            // Act
+            var result = await _usersAppServices.GetUserByIdAsync(userId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(userId, result.Value.Id);
+            Assert.Equal(user.Name, result.Value.Name);
+            Assert.Equal(user.Email, result.Value.Email);
+            Assert.Equal(user.CreatedAt, result.Value.CreatedAt);
+            Assert.Equal(user.IsActive, result.Value.IsActive);
+        }
     }
 }
