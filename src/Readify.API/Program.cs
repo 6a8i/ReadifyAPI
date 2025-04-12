@@ -1,5 +1,7 @@
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Microsoft.OpenApi.Models;
+using Readify.API.Common.Auth;
 using Readify.CrossCutting.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,11 +28,36 @@ builder.Services.AddApiVersioning().AddApiExplorer(options =>
     options.SubstituteApiVersionInUrl = true; // Substitui a versão na URL
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options => 
+{
+    options.AddSecurityDefinition("Apitoken", new Microsoft.OpenApi.Models.OpenApiSecurityScheme 
+    { 
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        In = ParameterLocation.Header,
+        Description = "This is an custom api authentication, just inform your token guid."
+
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme {
+                Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                        Id = "Apitoken"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 builder.Services.AddIoC(builder.Configuration);
 
 var app = builder.Build();
+
+app.UseMiddleware<AuthMiddleware>();
 
 var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 

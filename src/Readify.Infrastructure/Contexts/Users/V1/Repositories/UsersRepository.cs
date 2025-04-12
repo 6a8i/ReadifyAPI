@@ -27,6 +27,15 @@ namespace Readify.Infrastructure.Contexts.Users.V1.Repositories
             return result;
         }
 
+        public async Task<string?> GetPasswordByEmailAsync(Guid id)
+        {
+            var password = await _context.Users
+                                            .Where(u => u.Id == id)
+                                            .Select(u => u.Password)
+                                            .FirstOrDefaultAsync();
+            return password;
+        }
+
         public async Task<User?> GetUserByEmailAsync(string email)
         {
             var entity = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);

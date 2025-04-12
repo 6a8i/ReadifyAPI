@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Common\Auth\" />
     <Folder Include="Common\Log\" />
     <Folder Include="Common\RatelimitPolicies\" />
   </ItemGroup>

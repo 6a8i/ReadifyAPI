@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commons\Authentication\V1\Infrastructure\Entities\" />
-    <Folder Include="Commons\Authentication\V1\Models\Responses\" />
-    <Folder Include="Commons\Authentication\V1\Models\Requests\" />
+    <Folder Include="Commons\" />
   </ItemGroup>
 
   <ItemGroup>
