@@ -13,13 +13,20 @@ namespace Readify.Infrastructure.Contexts.Authentication.V1.Repositories
         public async Task<Guid> CreateTokenAsync(Token token)
         {
             _context.Tokens.Add(token);
-
-            var result = await _context.SaveChangesAsync();
-
-            if (result > 0)
-                return token.Id;
-            else
+            int result;
+            try
+            {
+                result = await _context.SaveChangesAsync();
+                
+                if (result > 0)
+                    return token.Id;
+                else
+                    return Guid.Empty;
+            }
+            catch (Exception)
+            {
                 return Guid.Empty;
+            }
         }
 
         public async Task<Token?> GetTokenByIdAsync(Guid id)

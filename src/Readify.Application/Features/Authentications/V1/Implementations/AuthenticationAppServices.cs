@@ -4,7 +4,6 @@ using Readify.Application.Features.Authentications.V1.Infrastructure.IRepositori
 using Readify.Application.Features.Authentications.V1.Models.Requests;
 using Readify.Application.Features.Authentications.V1.Models.Response;
 using Readify.Application.Features.Users.V1;
-using Readify.Application.Features.Users.V1.Infrastructure.Entities;
 using Readify.Application.Features.Users.V1.Models.Responses;
 
 namespace Readify.Application.Features.Authentications.V1.Implementations
@@ -90,9 +89,11 @@ namespace Readify.Application.Features.Authentications.V1.Implementations
             {
                 UserId = user.Value.Id,
                 CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddHours(8),
                 HasExpired = false
             };
+
+            // Set the expiration time to 8 hours from creation time
+            token.ExpiresAt = token.CreatedAt.AddHours(8);
 
             Guid tokenGuid = await _authenticationRepository.CreateTokenAsync(token);
 

@@ -1,8 +1,11 @@
-﻿using Moq;
+﻿using FluentResults;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
 using Readify.Application.Features.Users.V1.Implementations;
 using Readify.Application.Features.Users.V1.Infrastructure.Entities;
 using Readify.Application.Features.Users.V1.Infrastructure.IRepositories;
 using Readify.Application.Features.Users.V1.Models.Requests;
+using Readify.Application.Features.Users.V1.Models.Responses;
 
 namespace Readify.UnitTests.Features.Users.V1.ApplicationServices
 {
@@ -436,6 +439,128 @@ namespace Readify.UnitTests.Features.Users.V1.ApplicationServices
             Assert.Equal(request.Name, result.Value.Name);
             Assert.Equal(request.Email, result.Value.Email);
             Assert.Equal(request.IsActive, result.Value.IsActive);
+        }
+
+        [Fact]
+        public async Task GetUserByEmailAsync_ReturnsFailureResult_WhenEmailIsEmpty()
+        {
+            // Act
+            var result = await _usersAppServices.GetUserByEmailAsync(string.Empty);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("The email cannot be empty.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetUserByEmailAsync_ReturnsFailureResult_WhenUserNotFound()
+        {
+            // Arrange
+            var email = "nonexistent.user@example.com";
+            _mockUsersRepository.Setup(repo => repo.GetUserByEmailAsync(email))
+                .ReturnsAsync((User?)null);
+
+            // Act
+            var result = await _usersAppServices.GetUserByEmailAsync(email);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("User not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetUserByEmailAsync_ReturnsFailureResult_WhenUserIsInactive()
+        {
+            // Arrange
+            var email = "inactive.user@example.com";
+            var inactiveUser = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Inactive User",
+                Email = email,
+                IsActive = false
+            };
+            _mockUsersRepository.Setup(repo => repo.GetUserByEmailAsync(email))
+                .ReturnsAsync(inactiveUser);
+
+            // Act
+            var result = await _usersAppServices.GetUserByEmailAsync(email);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("User not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetUserByEmailAsync_ReturnsSuccessResult_WithUser()
+        {
+            // Arrange
+            var email = "active.user@example.com";
+            var activeUser = new User
+            {
+                Id = Guid.NewGuid(),
+                Name = "Active User",
+                Email = email,
+                CreatedAt = DateTime.UtcNow,
+                IsActive = true
+            };
+            _mockUsersRepository.Setup(repo => repo.GetUserByEmailAsync(email))
+                .ReturnsAsync(activeUser);
+
+            // Act
+            var result = await _usersAppServices.GetUserByEmailAsync(email);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(activeUser.Id, result.Value.Id);
+            Assert.Equal(activeUser.Name, result.Value.Name);
+            Assert.Equal(activeUser.Email, result.Value.Email);
+            Assert.Equal(activeUser.CreatedAt, result.Value.CreatedAt);
+            Assert.Equal(activeUser.IsActive, result.Value.IsActive);
+        }
+
+        [Fact]
+        public async Task GetUserPasswordAsync_ReturnsFailureResult_WhenIdIsEmpty()
+        {
+            // Act
+            var result = await _usersAppServices.GetUserPasswordAsync(Guid.Empty);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("The id cannot be empty.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetUserPasswordAsync_ReturnsFailureResult_WhenPasswordNotFound()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            _mockUsersRepository.Setup(repo => repo.GetPasswordByEmailAsync(userId))
+                .ReturnsAsync((string?)null);
+
+            // Act
+            var result = await _usersAppServices.GetUserPasswordAsync(userId);
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("User not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task GetUserPasswordAsync_ReturnsSuccessResult_WithPassword()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var expectedPassword = "Password123";
+            _mockUsersRepository.Setup(repo => repo.GetPasswordByEmailAsync(userId))
+                .ReturnsAsync(expectedPassword);
+
+            // Act
+            var result = await _usersAppServices.GetUserPasswordAsync(userId);
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(expectedPassword, result.Value);
         }
     }
 }
