@@ -2,7 +2,7 @@
 using Readify.Infrastructure.Commons.DatabaseContexts.V1;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Readify.Application.Commons.Authentication.V1.Implementations;
+using Readify.Application.Features.Authentications.V1.Implementations;
 
 namespace Readify.CrossCutting.DependencyInjection
 {

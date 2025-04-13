@@ -31,6 +31,8 @@ namespace Readify.Infrastructure.Contexts.Users.V1.EntitiesConfigurations
 
             builder.Property(b => b.IsActive)
                    .HasDefaultValue(true);
+
+            builder.HasMany(b => b.Tokens);
         }
     }
 }

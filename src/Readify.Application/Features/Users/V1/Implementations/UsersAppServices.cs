@@ -60,6 +60,19 @@ namespace Readify.Application.Features.Users.V1.Implementations
             return users.Select(user => (GetUserResponse)user).ToList().ToResult();
         }
 
+        public async Task<Result<GetUserResponse>> GetUserByEmailAsync(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+                return Result.Fail<GetUserResponse>("The email cannot be empty.");
+
+            User? user = await _usersRepository.GetUserByEmailAsync(email);
+
+            if (user is null || !user.IsActive)
+                return Result.Fail<GetUserResponse>("User not found!");
+
+            return (GetUserResponse)user;
+        }
+
         public async Task<Result<GetUserResponse>> GetUserByIdAsync(Guid id)
         {
             if (id == Guid.Empty)
@@ -71,6 +84,19 @@ namespace Readify.Application.Features.Users.V1.Implementations
                 return Result.Fail("User not found!");
 
             return (GetUserResponse)user;
+        }
+
+        public async Task<Result<string>> GetUserPasswordAsync(Guid id)
+        {
+            if (id == Guid.Empty)
+                return Result.Fail<string>("The id cannot be empty.");
+
+            string? password = await _usersRepository.GetPasswordByEmailAsync(id);
+
+            if (string.IsNullOrEmpty(password))
+                return Result.Fail<string>("User not found!");
+
+            return Result.Ok(password);
         }
 
         public async Task<Result<GetUserResponse>> UpdateUserByIdAsync(Guid id, UpdateUserRequest request)

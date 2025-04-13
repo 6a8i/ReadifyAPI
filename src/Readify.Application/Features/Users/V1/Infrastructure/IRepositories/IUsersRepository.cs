@@ -6,6 +6,7 @@ namespace Readify.Application.Features.Users.V1.Infrastructure.IRepositories
     {
         Task<Guid?> AddAsync(User entity);
         Task<List<User>> GetAllAsync();
+        Task<string?> GetPasswordByEmailAsync(Guid id);
         Task<User?> GetUserByEmailAsync(string email);
         Task<User?> GetUserByIdAsync(Guid id);
         Task<bool> UpdateAsync(User entity);
