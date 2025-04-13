@@ -179,5 +179,46 @@ namespace Readify.UnitTests.Features.Users.V1.Controllers
             var resultValue = Assert.IsType<Error>(badRequestResult.Value);
             Assert.Equal(expectedError, resultValue);
         }
+
+        [Fact]
+        public async Task Logout_ReturnsOkResult_WithLogoutResponse()
+        {
+            // Arrange
+            var logoutResponse = new LogoutResponse
+            {
+                Token = Guid.NewGuid(),
+                TokenHasExpired = true
+            };
+
+            _mockAuthenticationAppServices.Setup(service => service.LogoutAsync())
+                .ReturnsAsync(Result.Ok(logoutResponse));
+
+            // Act
+            var result = await _controller.Logout();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result);
+            var resultValue = Assert.IsType<Result<LogoutResponse>>(okResult.Value);
+            Assert.True(resultValue.IsSuccess);
+            Assert.Equal(logoutResponse.Token, resultValue.Value.Token);
+            Assert.True(resultValue.Value.TokenHasExpired);
+        }
+
+        [Fact]
+        public async Task Logout_ReturnsBadRequest_WhenServiceFails()
+        {
+            // Arrange
+            var expectedError = new Error("Logout failed");
+            _mockAuthenticationAppServices.Setup(service => service.LogoutAsync())
+                .ReturnsAsync(Result.Fail<LogoutResponse>(expectedError));
+
+            // Act
+            var result = await _controller.Logout();
+
+            // Assert
+            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            var resultValue = Assert.IsType<Error>(badRequestResult.Value);
+            Assert.Equal(expectedError, resultValue);
+        }
     }
 }

@@ -4,6 +4,8 @@ using Readify.Application.Features.Authentications.V1.Implementations;
 using Readify.Application.Features.Authentications.V1.Infrastructure.Entities;
 using Readify.Application.Features.Authentications.V1.Infrastructure.IRepositories;
 using Readify.Application.Features.Authentications.V1.Models.Requests;
+using Readify.Application.Features.Authentications.V1.Models.Response;
+using Readify.Application.Features.Authentications.V1.Models.Statics;
 using Readify.Application.Features.Users.V1;
 using Readify.Application.Features.Users.V1.Models.Responses;
 
@@ -289,6 +291,93 @@ namespace Readify.UnitTests.Features.Authentication.V1.ApplicationServices
             // Assert
             Assert.True(result.IsFailed);
             Assert.Equal("Something went wrong, try again later.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task LogoutAsync_ReturnsFailureResult_WhenAuthContextIsNull()
+        {
+            // Arrange
+            AuthManager.Context = null;
+
+            // Act
+            var result = await _authAppServices.LogoutAsync();
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("No login or authentication was made.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task LogoutAsync_ReturnsFailureResult_WhenUserNotFound()
+        {
+            // Arrange
+            AuthManager.Context = new AuthResponse { UserId = Guid.NewGuid() };
+            _mockUsersAppServices.Setup(service => service.GetUserByIdAsync(AuthManager.Context.UserId))
+                .ReturnsAsync(Result.Fail<GetUserResponse>("User not found!"));
+
+            // Act
+            var result = await _authAppServices.LogoutAsync();
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("User not found!", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task LogoutAsync_ReturnsFailureResult_WhenTokenExpirationFails()
+        {
+            // Arrange
+            AuthManager.Context = new AuthResponse { UserId = Guid.NewGuid() };
+            var userResponse = new GetUserResponse
+            {
+                Id = AuthManager.Context.UserId,
+                Name = "Test User",
+                Email = "test.user@example.com",
+                IsActive = true
+            };
+            _mockUsersAppServices.Setup(service => service.GetUserByIdAsync(AuthManager.Context.UserId))
+                .ReturnsAsync(Result.Ok(userResponse));
+            _mockAuthenticationRepository.Setup(repo => repo.ExpiresAllTokensByUserAsync(AuthManager.Context.UserId))
+                .ReturnsAsync(false);
+
+            // Act
+            var result = await _authAppServices.LogoutAsync();
+
+            // Assert
+            Assert.True(result.IsFailed);
+            Assert.Equal("Something went wrong, try again later.", result.Errors.First().Message);
+        }
+
+        [Fact]
+        public async Task LogoutAsync_ReturnsSuccessResult_WhenLogoutIsSuccessful()
+        {
+            // Arrange
+            AuthManager.Context = new AuthResponse
+            {
+                UserId = Guid.NewGuid(),
+                Token = Guid.NewGuid(),
+                TokenHasExpired = false,
+                TokenExpiresAt = DateTime.UtcNow.AddHours(1)
+            };
+            var userResponse = new GetUserResponse
+            {
+                Id = AuthManager.Context.UserId,
+                Name = "Test User",
+                Email = "test.user@example.com",
+                IsActive = true
+            };
+            _mockUsersAppServices.Setup(service => service.GetUserByIdAsync(AuthManager.Context.UserId))
+                .ReturnsAsync(Result.Ok(userResponse));
+            _mockAuthenticationRepository.Setup(repo => repo.ExpiresAllTokensByUserAsync(AuthManager.Context.UserId))
+                .ReturnsAsync(true);
+
+            // Act
+            var result = await _authAppServices.LogoutAsync();
+
+            // Assert
+            Assert.True(result.IsSuccess);
+            Assert.Equal(AuthManager.Context.Token, result.Value.Token);
+            Assert.True(result.Value.TokenHasExpired);
         }
     }
 }
