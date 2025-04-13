@@ -29,6 +29,20 @@ namespace Readify.Infrastructure.Contexts.Authentication.V1.Repositories
             }
         }
 
+        public async Task<bool> ExpiresAllTokensByUserAsync(Guid userId)
+        {
+            var result = await _context.Tokens
+                                            .Where(t => t.UserId == userId && !t.HasExpired)
+                                            .ExecuteUpdateAsync(t => 
+                                                t.SetProperty(p => p.HasExpired, true));
+            result = await _context.Tokens
+                                            .Where(t => t.UserId == userId && t.ExpiresAt > DateTime.UtcNow)
+                                            .ExecuteUpdateAsync(t => 
+                                                t.SetProperty(p => p.ExpiresAt, DateTime.UtcNow.AddHours(-1)));
+
+            return result > 0;
+        }
+
         public async Task<Token?> GetTokenByIdAsync(Guid id)
         {
             var result = await _context.Tokens.FindAsync(id);
@@ -38,7 +52,7 @@ namespace Readify.Infrastructure.Contexts.Authentication.V1.Repositories
 
         public async Task<Token?> GetTokenByUserIdAsync(Guid id)
         {
-            var result = await _context.Tokens.FirstOrDefaultAsync(x => x.UserId == id);
+            var result = await _context.Tokens.OrderByDescending(t => t.ExpiresAt).FirstOrDefaultAsync(x => x.UserId == id && !x.HasExpired);
             return result;
         }
 

@@ -8,5 +8,6 @@ namespace Readify.Application.Features.Authentications.V1
     {
         Task<Result<AuthResponse>> LoginAsync(LoginRequest request);
         Task<Result<AuthResponse>> GetTokenByIdAsync(Guid id);
+        Task<Result<LogoutResponse>> LogoutAsync();
     }
 }

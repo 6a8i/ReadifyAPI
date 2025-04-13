@@ -75,5 +75,16 @@ namespace Readify.API.Features.Users.V1.Controllers
             
             return Ok(result);
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            Result<LogoutResponse> result = await _authenticationAppServices.LogoutAsync();
+
+            if (result.IsFailed)
+                return BadRequest(result.Errors.FirstOrDefault());
+
+            return Ok(result);
+        }
     }
 }

@@ -3,8 +3,19 @@ using Asp.Versioning.ApiExplorer;
 using Microsoft.OpenApi.Models;
 using Readify.API.Common.Auth;
 using Readify.CrossCutting.DependencyInjection;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuração da cultura
+var supportedCultures = new[] { new CultureInfo("pt-BR") };
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("pt-BR");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
 
 // Add services to the container.
 
@@ -56,6 +67,9 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddIoC(builder.Configuration);
 
 var app = builder.Build();
+
+// Adiciona o middleware de localização
+app.UseRequestLocalization();
 
 app.UseMiddleware<AuthMiddleware>();
 
