@@ -16,7 +16,7 @@ namespace Readify.CrossCutting.DependencyInjection
         private readonly static AuthenticationAppServices auth; // This is only to get the explicit reference to the Application layer, so that the IoC container can be registered properly.
         public static IServiceCollection AddIoC(this IServiceCollection services, ConfigurationManager configuration)
         {
-            services.AddAppServices().AddRepositories(configuration).AddFusionCache(configuration);
+            services.AddAppServices().AddRepositories(configuration).AddFusionCacheConfigurations(configuration);
             return services;
         }
 
@@ -46,10 +46,10 @@ namespace Readify.CrossCutting.DependencyInjection
             return services;
         }
 
-        private static IServiceCollection AddRepositories(this IServiceCollection services, ConfigurationManager configuration)
+        public static IServiceCollection AddRepositories(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<ReadifyDatabaseContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(configuration.GetSection("ConnectionStrings")["DefaultConnection"]));
 
             IEnumerable<Type> implementationClasses = AppDomain.CurrentDomain
                                                                 .Load("Readify.Infrastructure")
@@ -74,12 +74,12 @@ namespace Readify.CrossCutting.DependencyInjection
             return services;
         }
 
-        private static IServiceCollection AddFusionCache(this IServiceCollection services, ConfigurationManager configuration)
+        public static IServiceCollection AddFusionCacheConfigurations(this IServiceCollection services, IConfiguration configuration)
         {
             // Registrar o Redis como cache distribuído
 
             // Configuração do Redis
-            var redisConnectionString = configuration.GetConnectionString("redis_connection_string");
+            var redisConnectionString = configuration.GetSection("ConnectionStrings")["redis_connection_string"];
             
             services.AddStackExchangeRedisCache(options =>
             {

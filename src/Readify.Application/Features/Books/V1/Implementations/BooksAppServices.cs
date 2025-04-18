@@ -52,7 +52,7 @@ namespace Readify.Application.Features.Books.V1.Implementations
         {
             string cacheKey = $"{AuthManager.Context!.UserId}-books-all";
             // Check if the data is already cached
-            List<Models.Responses.Book>? result = await _fusionCache.GetOrDefaultAsync<List<Models.Responses.Book>?>(cacheKey);
+            List<Models.Responses.Book>? result = await _fusionCache.GetOrDefaultAsync<List<Models.Responses.Book>?>(cacheKey, (List<Models.Responses.Book>?)null, null, default);
 
             if(result is not null)
                 return Result.Ok(result);
