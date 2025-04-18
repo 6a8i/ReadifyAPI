@@ -1,20 +1,34 @@
 ﻿using Moq;
+using Readify.Application.Features.Authentications.V1.Models.Response;
+using Readify.Application.Features.Authentications.V1.Models.Statics;
 using Readify.Application.Features.Books.V1.Implementations;
 using Readify.Application.Features.Books.V1.Infrastructure.Entities;
 using Readify.Application.Features.Books.V1.Infrastructure.IRepositories;
 using Readify.Application.Features.Books.V1.Models.Requests;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
 {
     public class BooksAppServicesTests
     {
         private readonly Mock<IBooksRepository> _mockBooksRepository;
+        private readonly Mock<IFusionCache> _mockFusionCache;
         private readonly BooksAppServices _booksAppServices;
 
         public BooksAppServicesTests()
         {
             _mockBooksRepository = new Mock<IBooksRepository>();
-            _booksAppServices = new BooksAppServices(_mockBooksRepository.Object);
+            _mockFusionCache = new Mock<IFusionCache>();
+            _booksAppServices = new BooksAppServices(_mockBooksRepository.Object, _mockFusionCache.Object);
+
+            AuthManager.Context = new AuthResponse
+            { 
+                Token = Guid.NewGuid(),
+                TokenCreatedAt = DateTime.Now,
+                TokenExpiresAt = DateTime.Now.AddHours(8),
+                UserId = Guid.NewGuid(),
+                TokenHasExpired = false
+            };
         }
 
         [Fact]
@@ -133,6 +147,12 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
                     Status = true
                 }
             };
+            
+            _mockFusionCache.Setup(cache => cache.GetOrDefaultAsync<List<Book>?>(It.IsAny<string>(), It.IsAny<List<Book>?>(), null, default))
+                .ReturnsAsync((List<Book>?)null);
+
+            _mockFusionCache.Setup(cache => cache.SetAsync<List<Book>?>(It.IsAny<string>(), It.IsAny<List<Book>?>(), It.IsAny<FusionCacheEntryOptions>() , null, default));
+
             _mockBooksRepository.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(books);
 
@@ -151,6 +171,11 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
             _mockBooksRepository.Setup(repo => repo.GetAllAsync())
                 .ReturnsAsync(new List<Book>());
 
+            _mockFusionCache.Setup(cache => cache.GetOrDefaultAsync<List<Book>?>(It.IsAny<string>(), It.IsAny<List<Book>?>(), null, default))
+                .ReturnsAsync((List<Book>?)null);
+
+            _mockFusionCache.Setup(cache => cache.SetAsync<List<Book>?>(It.IsAny<string>(), It.IsAny<List<Book>?>(), It.IsAny<FusionCacheEntryOptions>(), null, default));
+
             // Act
             var result = await _booksAppServices.GetAllBooksAsync();
 
@@ -164,7 +189,12 @@ namespace Readify.UnitTests.Features.Books.V1.ApplicationServices
         {
             // Arrange
             _mockBooksRepository.Setup(repo => repo.GetAllAsync())
-                .ReturnsAsync((List<Book>)null);
+                .ReturnsAsync((List<Book>?)null);
+
+            _mockFusionCache.Setup(cache => cache.GetOrDefaultAsync<List<Book>?>(It.IsAny<string>(), It.IsAny<List<Book>?>(), null, default))
+                .ReturnsAsync((List<Book>?)null);
+
+            _mockFusionCache.Setup(cache => cache.SetAsync<List<Book>?>(It.IsAny<string>(), It.IsAny<List<Book>?>(), It.IsAny<FusionCacheEntryOptions>(), null, default));
 
             // Act
             var result = await _booksAppServices.GetAllBooksAsync();
