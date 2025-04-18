@@ -64,7 +64,7 @@ namespace Readify.Application.Features.Books.V1.Implementations
 
             result = [.. books.Select(b => (Models.Responses.Book)b)];
 
-            await _fusionCache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
+            await _fusionCache.SetAsync(cacheKey, result, new FusionCacheEntryOptions { Duration = TimeSpan.FromDays(1) });
 
             return Result.Ok(result);
         }
