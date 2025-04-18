@@ -1,13 +1,16 @@
 ﻿using FluentResults;
+using Readify.Application.Features.Authentications.V1.Models.Statics;
 using Readify.Application.Features.Books.V1.Infrastructure.Entities;
 using Readify.Application.Features.Books.V1.Infrastructure.IRepositories;
 using Readify.Application.Features.Books.V1.Models.Requests;
+using ZiggyCreatures.Caching.Fusion;
 
 namespace Readify.Application.Features.Books.V1.Implementations
 {
-    public class BooksAppServices(IBooksRepository booksRepository) : IBooksAppServices
+    public class BooksAppServices(IBooksRepository booksRepository, IFusionCache fusionCache) : IBooksAppServices
     {
         private readonly IBooksRepository _booksRepository = booksRepository;
+        private readonly IFusionCache _fusionCache = fusionCache; 
 
         public async Task<Result<Guid>> CreateABookAsync(AddBookRequest request)
         {
@@ -47,12 +50,23 @@ namespace Readify.Application.Features.Books.V1.Implementations
 
         public async Task<Result<List<Models.Responses.Book>>> GetAllBooksAsync()
         {
+            string cacheKey = $"{AuthManager.Context!.UserId}-books-all";
+            // Check if the data is already cached
+            List<Models.Responses.Book>? result = await _fusionCache.GetOrDefaultAsync<List<Models.Responses.Book>?>(cacheKey);
+
+            if(result is not null)
+                return Result.Ok(result);
+
             List<Book> books = await _booksRepository.GetAllAsync();
 
             if (books is null || books.Count == 0)
                 return Result.Fail("No books found!");
 
-            return books.Select(b => (Models.Responses.Book)b).ToList().ToResult();
+            result = [.. books.Select(b => (Models.Responses.Book)b)];
+
+            await _fusionCache.SetAsync(cacheKey, result, TimeSpan.FromHours(1));
+
+            return Result.Ok(result);
         }
 
         public async Task<Result<Models.Responses.Book>> GetBookByIdAsync(Guid id)
